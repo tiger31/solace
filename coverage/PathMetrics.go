@@ -1,119 +1,60 @@
 package coverage
 
 import (
-	"ally/coverage/metrics"
+	"github.com/go-openapi/spec"
+	"net/http"
+	"reflect"
+	"strings"
 )
 
-type Metric interface {
-	Coverage() float32
-	Reset()
-}
+var methods = []string{"Get", "Put", "Post", "Delete", "Options", "Head", "Patch"}
 
-// -- MetricsPoll -- //
-
-type MetricsPoll struct {
-	Poll []Metric
-}
-
-func (m *MetricsPoll) Coverage() float32 {
-	var sum float32
-	for _, metric := range m.Poll {
-		sum += metric.Coverage()
-	}
-	return sum / float32(len(m.Poll))
-}
-
-func (m *MetricsPoll) Add(metric Metric) {
-	m.Poll = append(m.Poll, metric)
-}
-
-func (m *MetricsPoll) Reset() {
-	for _, metric := range m.Poll {
-		metric.Reset()
-	}
-}
-
-// -- RequestMetrics -- //
-
-type RequestMetrics struct {
-	PresentMetric *metrics.PresentMetric
+type PathMetric struct {
+	Methods map[string]*MethodMetric
 	poll MetricsPoll
 }
 
-func (m *RequestMetrics) Coverage() float32 {
+func (m *PathMetric) Coverage() float32 {
 	return m.poll.Coverage()
 }
 
-func (m *RequestMetrics) Reset() {
+func (m *PathMetric) Reset() {
 	m.poll.Reset()
 }
 
-func CreateRequestMetric() RequestMetrics {
-	PresentMetric :=& metrics.PresentMetric{}
-	return RequestMetrics{
-		PresentMetric: PresentMetric,
-		poll:   MetricsPoll{
-			[]Metric{PresentMetric},
-		},
+func (m *PathMetric) ProcessRequest(r *http.Request) {
+	if metric, exists := m.Methods[r.Method]; exists {
+		metric.ProcessRequest(r)
 	}
 }
 
-// -- ResponseMetrics -- //
-
-type ResponseMetrics struct {
-	PresentMetric *metrics.PresentMetric
-	poll MetricsPoll
-}
-
-func (m *ResponseMetrics) Coverage() float32 {
-	return m.poll.Coverage()
-}
-
-func (m *ResponseMetrics) Reset() {
-	m.poll.Reset()
-}
-
-func CreateResponseMetric() ResponseMetrics {
-	PresentMetric := &metrics.PresentMetric{}
-	return ResponseMetrics{
-		PresentMetric: PresentMetric,
-		poll:   MetricsPoll{
-			[]Metric{PresentMetric},
-		},
+func (m *PathMetric) ProcessResponse(req *http.Request, res *http.Response) {
+	if metric, exists := m.Methods[req.Method]; exists {
+		metric.ProcessResponse(req, res)
 	}
+	//TODO undocumented
 }
 
-// -- PathMetrics -- //
-
-type PathMetrics struct {
-	Req RequestMetrics
-	Res ResponseMetrics
+func CreatePathMetric(item *spec.PathItem) PathMetric {
+	path := PathMetric{
+		Methods: make(map[string]*MethodMetric),
+		poll:    MetricsPoll{},
+	}
+	ref := reflect.ValueOf(item.PathItemProps)
+	for _, method := range methods {
+		operation := ref.FieldByName(method).Interface().(*spec.Operation)
+		if operation != nil {
+			req := CreateRequestMetric()
+			res := CreateResponseMetric(operation.Responses)
+			metric := MethodMetric{
+				Request:  &req,
+				Response: &res,
+			}
+			path.Methods[strings.ToUpper(method)] = &metric
+			path.poll.Add(&metric)
+		}
+	}
+	return path
 }
 
-func (m *PathMetrics) Coverage() float32 {
-	return (m.Req.Coverage() + m.Res.Coverage()) / 2
-}
-
-func (m *PathMetrics) Reset() {
-	m.Req.Reset()
-	m.Res.Reset()
-}
-
-// -- SpecMetrics -- //
-
-type SpecMetrics struct {
-	poll MetricsPoll
-}
-
-func (m *SpecMetrics) Coverage() float32 {
-	return m.poll.Coverage()
-}
-
-func (m *SpecMetrics) Reset() {
-	m.poll.Reset()
-}
-
-func (m *SpecMetrics) Add(metric Metric) {
-	m.poll.Add(metric)
-}
 

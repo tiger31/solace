@@ -1,4 +1,4 @@
-package metrics
+package coverage
 
 type PresentMetric struct {
 	Present bool

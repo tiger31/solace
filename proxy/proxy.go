@@ -74,7 +74,7 @@ func OnRequest(ctx *httpproxy.Context, req *http.Request) (resp *http.Response) 
 	} else {
 		if running {
 			ref := spec.Root.ResolveURL(req.URL)
-			ref.Metrics.Req.PresentMetric.Present = true
+			ref.Metrics.ProcessRequest(req)
 			requestsMap[req] = ref
 		}
 		return
@@ -84,8 +84,8 @@ func OnRequest(ctx *httpproxy.Context, req *http.Request) (resp *http.Response) 
 func OnResponse(ctx *httpproxy.Context, req *http.Request, resp *http.Response) {
 	if running {
 		ref := requestsMap[req]
-		ref.Metrics.Res.PresentMetric.Present = true
-		resp.Header.Add("Via", "ally-coverage-tool")
+		ref.Metrics.ProcessResponse(req, resp)
+		resp.Header.Add("Via", "solace-coverage-tool")
 	}
 }
 

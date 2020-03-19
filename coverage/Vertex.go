@@ -11,7 +11,7 @@ var PathVariable, _ = regexp.Compile(`\{.*\}`)
 
 type SwaggerRef struct {
 	Item *spec.PathItem
-	Metrics *PathMetrics
+	Metrics *PathMetric
 }
 
 type Vertex struct {
@@ -43,10 +43,7 @@ func (v *Vertex) AddPath(path string, item spec.PathItem, metrics *SpecMetrics) 
 		}
 		vertex = vertex.Vertexes[part] //Set children vertex as next
 	}
-	pathMetrics := PathMetrics{
-		Req: CreateRequestMetric(),
-		Res: CreateResponseMetric(),
-	}
+	pathMetrics := CreatePathMetric(&item)
 	vertex.Value = &SwaggerRef{
 		Item:    &item,
 		Metrics: &pathMetrics,
