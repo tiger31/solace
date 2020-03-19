@@ -10,12 +10,14 @@ import (
 var methods = []string{"Get", "Put", "Post", "Delete", "Options", "Head", "Patch"}
 
 type PathMetric struct {
-	Methods map[string]*MethodMetric
+	Methods map[string]*MethodMetric	`json:"methods,omitempty"`
 	poll MetricsPoll
+	Memoized float32									`json:"coverage"`
 }
 
 func (m *PathMetric) Coverage() float32 {
-	return m.poll.Coverage()
+	m.Memoized = m.poll.Coverage()
+	return m.Memoized
 }
 
 func (m *PathMetric) Reset() {

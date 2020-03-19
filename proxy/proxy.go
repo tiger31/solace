@@ -3,6 +3,7 @@ package proxy
 import (
 	"ally/coverage"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -66,10 +67,13 @@ func OnRequest(ctx *httpproxy.Context, req *http.Request) (resp *http.Response) 
 			return resp
 		}
 	} else if coverageTeardown(req) {
-		body, _ := json.Marshal(spec.Metrics.Coverage())
+		spec.Metrics.Coverage()
+		body, _ := json.Marshal(spec.Metrics)
+		fmt.Println(string(body))
 		spec.Metrics.Reset()
 		running = false
 		resp := httpproxy.InMemoryResponse(200, nil, body)
+		resp.Header.Set("Content-Type", "application/json")
 		return resp
 	} else {
 		if running {

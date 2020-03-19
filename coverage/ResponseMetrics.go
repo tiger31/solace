@@ -6,12 +6,14 @@ import (
 )
 
 type ResponseMetrics struct {
-	CodeMetrics map[int]*ResponseCodeMetric
-	poll MetricsPoll
+	CodesMetrics map[int]*ResponseCodeMetric	`json:"codes"`
+	poll         MetricsPoll
+	Memoized     float32											`json:"coverage"`
 }
 
 func (m *ResponseMetrics) Coverage() float32 {
-	return m.poll.Coverage()
+	m.Memoized = m.poll.Coverage()
+	return m.Memoized
 }
 
 func (m *ResponseMetrics) Reset() {
@@ -19,7 +21,7 @@ func (m *ResponseMetrics) Reset() {
 }
 
 func (m *ResponseMetrics) ProcessResponse(req *http.Request, res *http.Response) {
-	if metric, exists := m.CodeMetrics[res.StatusCode]; exists {
+	if metric, exists := m.CodesMetrics[res.StatusCode]; exists {
 		metric.ProcessResponse(req, res)
 	}
 	//TODO undocumented
@@ -28,7 +30,7 @@ func (m *ResponseMetrics) ProcessResponse(req *http.Request, res *http.Response)
 func CreateResponseMetric(r *spec.Responses) ResponseMetrics {
 	codes := make(map[int]*ResponseCodeMetric)
 	poll := MetricsPoll{
-		make([]Metric, 0),
+		Poll: make([]Metric, 0),
 	}
 	for code, response := range r.ResponsesProps.StatusCodeResponses {
 		metric := CreateResponseCodeMetric(&response)
@@ -36,7 +38,7 @@ func CreateResponseMetric(r *spec.Responses) ResponseMetrics {
 		poll.Add(&metric)
 	}
 	return ResponseMetrics{
-		CodeMetrics: codes,
-		poll: poll,
+		CodesMetrics: codes,
+		poll:         poll,
 	}
 }

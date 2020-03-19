@@ -48,7 +48,7 @@ func (v *Vertex) AddPath(path string, item spec.PathItem, metrics *SpecMetrics) 
 		Item:    &item,
 		Metrics: &pathMetrics,
 	} //Set to target vertex it's PathItem
-	metrics.Add(&pathMetrics)
+	metrics.Add(path, &pathMetrics)
 }
 
 func (v* Vertex) getPathChildren() []*Vertex {
@@ -96,6 +96,7 @@ func FromSwagger(swagger *spec.Swagger) *CovSpec {
 		Vertexes: make(map[string]*Vertex),
 	}
 	spec := SpecMetrics{
+		Paths: make(map[string]*PathMetric),
 		poll: MetricsPoll{
 			Poll: make([]Metric, 0, len(swagger.Paths.Paths)),
 		},

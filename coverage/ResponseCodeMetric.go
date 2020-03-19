@@ -6,12 +6,14 @@ import (
 )
 
 type ResponseCodeMetric struct {
-	Present *PresentMetric
-	poll MetricsPoll
+	PresentMetric *PresentMetric	`json:"present_metric"`
+	poll          MetricsPoll
+	Memoized      float32					`json:"coverage"`
 }
 
 func (m *ResponseCodeMetric) Coverage() float32 {
-	return m.poll.Coverage()
+	m.Memoized = m.poll.Coverage()
+	return m.Memoized
 }
 
 func (m *ResponseCodeMetric) Reset() {
@@ -19,13 +21,13 @@ func (m *ResponseCodeMetric) Reset() {
 }
 
 func (m *ResponseCodeMetric) ProcessResponse(req *http.Request, res *http.Response) {
-	m.Present.Present = true
+	m.PresentMetric.Present = true
 }
 
 func CreateResponseCodeMetric(r *spec.Response) ResponseCodeMetric {
 	PresentMetric := &PresentMetric{}
 	return ResponseCodeMetric{
-		Present: PresentMetric,
+		PresentMetric: PresentMetric,
 		poll:    MetricsPoll{
 			Poll: []Metric{PresentMetric},
 		},

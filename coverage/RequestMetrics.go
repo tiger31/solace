@@ -3,12 +3,14 @@ package coverage
 import "net/http"
 
 type RequestMetrics struct {
-	PresentMetric *PresentMetric
-	poll MetricsPoll
+	PresentMetric *PresentMetric	`json:"present_metric"`
+	poll          MetricsPoll
+	Memoized      float32					`json:"coverage"`
 }
 
 func (m *RequestMetrics) Coverage() float32 {
-	return m.poll.Coverage()
+	m.Memoized = m.poll.Coverage()
+	return m.Memoized
 }
 
 func (m *RequestMetrics) Reset() {
@@ -24,7 +26,7 @@ func CreateRequestMetric() RequestMetrics {
 	return RequestMetrics{
 		PresentMetric: PresentMetric,
 		poll:   MetricsPoll{
-			[]Metric{PresentMetric},
+			Poll: []Metric{PresentMetric},
 		},
 	}
 }
