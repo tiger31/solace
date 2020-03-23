@@ -19,16 +19,17 @@ type ResponseProcessor interface {
 
 type MetricsPoll struct {
 	Poll []Metric
-	_coverage float32
 }
 
 func (m *MetricsPoll) Coverage() float32 {
+	if len(m.Poll) == 0 {
+		return  1
+	}
 	var sum float32
 	for _, metric := range m.Poll {
 		sum += metric.Coverage()
 	}
-	m._coverage = sum / float32(len(m.Poll))
-	return m._coverage
+	return sum / float32(len(m.Poll))
 }
 
 func (m *MetricsPoll) Add(metric Metric) {

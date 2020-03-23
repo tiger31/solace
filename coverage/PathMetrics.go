@@ -48,9 +48,11 @@ func CreatePathMetric(item *spec.PathItem) PathMetric {
 		if operation != nil {
 			req := CreateRequestMetric()
 			res := CreateResponseMetric(operation.Responses)
+			mime := CreateMIMEMetric(operation.Consumes, operation.Produces)
 			metric := MethodMetric{
 				Request:  &req,
 				Response: &res,
+				MIME:			&mime,
 			}
 			path.Methods[strings.ToUpper(method)] = &metric
 			path.poll.Add(&metric)
