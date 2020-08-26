@@ -4,7 +4,6 @@ import java.util.Map;
 
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
-import solace.coverage.annotations.InnerMetric;
 import solace.coverage.base.AbstractMapMetric;
 import solace.coverage.base.IMetric;
 import solace.coverage.base.IRequestProcessor;

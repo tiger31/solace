@@ -18,7 +18,7 @@ public class MetricSerializer extends BaseSerializer implements JsonSerializer<I
         obj.addProperty("coverage", metric.getCoverage());
         //Metric metadata
         MetricMetadata metadata = metric.getMetadata();
-        obj.add("meta", (metadata.isEmpty()) ? null : context.serialize(metric.getMetadata()));
+        obj.add("meta", (metadata == null || metadata.isEmpty()) ? null : context.serialize(metric.getMetadata()));
         //Inner metrics
         obj.add("inner", AnnotationsManager.getInnerMetricsFields(metric, context));
         return obj;
