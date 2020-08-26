@@ -1,17 +1,16 @@
 package solace.coverage.base.serializers;
 
-import solace.coverage.base.IMetric;
-import solace.coverage.base.MetricMetadata;
 import java.lang.reflect.Type;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 
-public class MetricSerializer extends BaseSerializer implements JsonSerializer<IMetric<?>> {
+import solace.coverage.base.IMetric;
+import solace.coverage.base.MetricMetadata;
 
-    @Override
-    public JsonElement serialize(IMetric<?> metric, Type metricType, JsonSerializationContext context) {
+public class BaseSerializer  {
+	protected JsonElement serialize(IMetric<?> metric, Type metricType, JsonSerializationContext context) {
         JsonObject obj = new JsonObject();
         //Default metric fields
         obj.addProperty("type", metric.getClass().getSimpleName());
@@ -22,6 +21,5 @@ public class MetricSerializer extends BaseSerializer implements JsonSerializer<I
         //Inner metrics
         obj.add("inner", AnnotationsManager.getInnerMetricsFields(metric, context));
         return obj;
-    }
-
+	}
 }

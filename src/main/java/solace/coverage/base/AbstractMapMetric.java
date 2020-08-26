@@ -1,27 +1,27 @@
 package solace.coverage.base;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
-public class AbstractCollectionMetric<T, V> extends ArrayList<IMetric<V>> implements ICollectionMetric<T, V> {
-    private static final long serialVersionUID = -2186734531427991245L;
+public class AbstractMapMetric<T, V> extends HashMap<String, IMetric<V>> implements IMapMetric<T, V> {
+    private static final long serialVersionUID = 2728553957814960712L;
     private MetricMetadata metadata = new MetricMetadata();
     private T specificationEntity; 
 
-    public AbstractCollectionMetric(T entity) {
+    public AbstractMapMetric(T entity) {
         this.specificationEntity = entity;
     }
 
     @Override
     public float getCoverage() {
         float coverage = 0;
-        for (IMetric<V> metric : this)
+        for (IMetric<V> metric : this.values())
             coverage += metric.getCoverage();
         return coverage / Math.max(this.size(), 1);
     }
 
     @Override
     public void Reset() {
-        for (IMetric<V> metric : this)
+        for (IMetric<V> metric : this.values())
             metric.Reset();
     }
 
@@ -30,12 +30,13 @@ public class AbstractCollectionMetric<T, V> extends ArrayList<IMetric<V>> implem
         return this.metadata;
     }
 
-    protected IMetric<V> addMetric(IMetric<V> metric) {
-        return (this.add(metric)) ? metric : null;
+    protected IMetric<V> addMetric(String key, IMetric<V> metric) {
+        return this.put(key, metric);
     }
 
     @Override
     public T getSpecificationEntity() {
         return this.specificationEntity;
     }
+    
 }

@@ -11,7 +11,7 @@ public final class PathsTree<T> {
 
     private Vertex<T> root = new Vertex<T>("", null);
     
-    public PathsTree(Map<String, T> pathsList) {
+    public <V extends Map<String, T>> PathsTree(V pathsList) {
         for (Map.Entry<String, T> key : pathsList.entrySet()) {
             this.addPath(key.getKey(), key.getValue());
         }        

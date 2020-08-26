@@ -2,8 +2,10 @@ package solace;
 
 import io.swagger.v3.parser.*;
 import solace.coverage.base.ICollectionMetric;
+import solace.coverage.base.IMapMetric;
 import solace.coverage.base.IMetric;
 import solace.coverage.base.serializers.CollectionMetricSerializer;
+import solace.coverage.base.serializers.MapMetricSerializer;
 import solace.coverage.base.serializers.MetricSerializer;
 import solace.coverage.metrics.PathsMetrics;
 
@@ -21,7 +23,8 @@ public class App
         PathsMetrics p = new PathsMetrics(openAPI.getPaths());
         builder.serializeNulls()
             .registerTypeHierarchyAdapter(IMetric.class, new MetricSerializer())
-            .registerTypeHierarchyAdapter(ICollectionMetric.class, new CollectionMetricSerializer());
+            .registerTypeHierarchyAdapter(ICollectionMetric.class, new CollectionMetricSerializer())
+            .registerTypeHierarchyAdapter(IMapMetric.class, new MapMetricSerializer());
         Gson gson = builder.create();
         System.out.println(gson.toJson(p));
     }
